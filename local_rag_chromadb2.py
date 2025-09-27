@@ -55,12 +55,12 @@ class LocalRAGChatbot:
             raise
         
         # Initialize ChromaDB client (local)
-        #self.chroma_client = chromadb.PersistentClient(path="./chroma_db")
-        
+
         try:
-            self.chroma_client = chromadb.Client(chromadb.config.Settings(
-            chroma_db_impl="duckdb+parquet",
-            persist_directory="./chroma_db"))
+            self.chroma_client = chromadb.PersistentClient(path="./chroma_db")
+            # self.chroma_client = chromadb.Client(chromadb.config.Settings(
+            # chroma_db_impl="duckdb+parquet",
+            # persist_directory="./chroma_db"))
             
             # Create or get collection
             self.collection = self.chroma_client.get_or_create_collection(
