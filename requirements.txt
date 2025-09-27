@@ -5,4 +5,6 @@ pypdf==3.15.2
 python-dotenv==1.0.0
 azure-ai-inference
 azure-core
+azure-identity
+azuire-ai-projects
 gunicorn==21.2.0
