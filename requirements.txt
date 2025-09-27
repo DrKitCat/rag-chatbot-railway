@@ -6,5 +6,5 @@ python-dotenv==1.0.0
 azure-ai-inference
 azure-core
 azure-identity
-azuire-ai-projects
+azure-ai-projects
 gunicorn==21.2.0
