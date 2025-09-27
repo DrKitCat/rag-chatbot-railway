@@ -17,26 +17,60 @@ except Exception as e:
 def index():
     return render_template('index.html')
 
+# @app.route('/chat', methods=['POST'])
+# def chat():
+#     if not chatbot:
+#         return jsonify({'error': 'Chatbot not available'}), 500
+        
+#     data = request.get_json()
+#     query = data.get('query', '')
+    
+#     if not query:
+#         return jsonify({'error': 'No query provided'}), 400
+    
+#     print(f"Received query: {query}")
+    
+#     try:
+#         result = chatbot.chat_with_routing(query)
+#         print(f"Sending response: {result}")
+#         return jsonify(result)
+#     except Exception as e:
+#         print(f"Error processing query: {e}")
+#         return jsonify({'error': str(e)}), 500
+
 @app.route('/chat', methods=['POST'])
 def chat():
+    print("=== CHAT ENDPOINT HIT ===")
+    print(f"Request method: {request.method}")
+    print(f"Content-Type: {request.content_type}")
+    
     if not chatbot:
+        print("ERROR: Chatbot not available")
         return jsonify({'error': 'Chatbot not available'}), 500
-        
-    data = request.get_json()
-    query = data.get('query', '')
-    
-    if not query:
-        return jsonify({'error': 'No query provided'}), 400
-    
-    print(f"Received query: {query}")
     
     try:
+        data = request.get_json()
+        print(f"Received data: {data}")
+        
+        query = data.get('query', '')
+        print(f"Query: {query}")
+        
+        if not query:
+            print("ERROR: No query provided")
+            return jsonify({'error': 'No query provided'}), 400
+        
+        print("Calling chatbot.chat_with_routing...")
         result = chatbot.chat_with_routing(query)
-        print(f"Sending response: {result}")
+        print(f"Result: {result}")
+        
         return jsonify(result)
     except Exception as e:
-        print(f"Error processing query: {e}")
+        print(f"EXCEPTION in chat endpoint: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+
 
 @app.route('/health')
 def health():
