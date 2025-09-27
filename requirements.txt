@@ -1,0 +1,8 @@
+flask==2.3.3
+sentence-transformers==2.7.0
+chromadb==0.4.15
+pypdf==3.15.2
+python-dotenv==1.0.0
+azure-ai-inference
+azure-core
+gunicorn==21.2.0

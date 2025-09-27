@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CIRD Manual Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8B7355 0%, #A0956B 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        #chat-container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 30px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #8B7355, #A0956B, #B8AA7A, #8B7355);
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #bdc3c7;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .chat-content {
+            padding: 30px 40px;
+        }
+        
+        #input-section {
+            background: #F5F3F0;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #E8E4DF;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #input-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8B7355, #A0956B);
+        }
+        
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        #user-input { 
+            flex: 1;
+            padding: 15px 20px; 
+            border: 2px solid #D4CFC7;
+            border-radius: 25px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+        }
+        
+        #user-input:focus {
+            border-color: #8B7355;
+            box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
+            transform: translateY(-1px);
+        }
+
+        #user-input::placeholder {
+            color: #8e9aaf;
+        }
+        
+        #send-btn { 
+            padding: 15px 25px; 
+            background: linear-gradient(135deg, #8B7355 0%, #A0956B 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            min-width: 100px;
+        }
+
+        #send-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        #send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 115, 85, 0.3);
+        }
+
+        #send-btn:hover::before {
+            left: 100%;
+        }
+
+        #send-btn:active {
+            transform: translateY(0);
+        }
+        
+        #messages { 
+            min-height: 450px; 
+            max-height: 600px;
+            border: 1px solid #D4CFC7; 
+            padding: 25px; 
+            overflow-y: auto; 
+            background: linear-gradient(to bottom, #ffffff 0%, #FEFDFB 100%);
+            border-radius: 15px;
+            position: relative;
+        }
+
+        /* Custom scrollbar */
+        #messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #8B7355, #A0956B);
+            border-radius: 3px;
+        }
+
+        #messages::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #7A6449, #8F8459);
+        }
+        
+        .message { 
+            margin: 20px 0; 
+            padding: 18px 22px;
+            border-radius: 18px;
+            line-height: 1.6;
+            position: relative;
+            animation: messageSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .user { 
+            background: linear-gradient(135deg, #8B7355 0%, #A0956B 100%);
+            color: white;
+            margin-left: 80px;
+            border-bottom-right-radius: 8px;
+            box-shadow: 0 4px 15px rgba(139, 115, 85, 0.3);
+            position: relative;
+        }
+
+        .user::before {
+            content: '👤';
+            position: absolute;
+            left: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35px;
+            height: 35px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .assistant { 
+            background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+            color: white;
+            margin-right: 80px;
+            border-bottom-left-radius: 8px;
+            white-space: pre-line;
+            box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+            position: relative;
+        }
+
+        .assistant::before {
+            content: '🤖';
+            position: absolute;
+            right: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35px;
+            height: 35px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .assistant strong {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .sources { 
+            font-size: 14px; 
+            background: linear-gradient(135deg, #92400E 0%, #B45309 100%);
+            color: white;
+            padding: 18px 22px;
+            margin: 20px 60px;
+            border-radius: 15px;
+            white-space: pre-line;
+            box-shadow: 0 4px 15px rgba(146, 64, 14, 0.3);
+            position: relative;
+        }
+
+        .sources::before {
+            content: '📚';
+            position: absolute;
+            left: -25px;
+            top: 18px;
+            width: 30px;
+            height: 30px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .sources a {
+            color: #ffffff;
+            text-decoration: none;
+            border-bottom: 1px dotted rgba(255,255,255,0.7);
+            transition: all 0.3s ease;
+        }
+        
+        .sources a:hover {
+            border-bottom-style: solid;
+            background: rgba(255,255,255,0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #8e9aaf;
+            font-style: italic;
+            padding: 80px 20px;
+            background: radial-gradient(circle at center, rgba(139, 115, 85, 0.05) 0%, transparent 70%);
+            border-radius: 15px;
+            border: 2px dashed #D4CFC7;
+        }
+
+        .empty-state::before {
+            content: '💬';
+            display: block;
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%) !important;
+            color: white !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            #chat-container {
+                border-radius: 15px;
+            }
+
+            .chat-content {
+                padding: 20px 25px;
+            }
+
+            .header {
+                padding: 25px 30px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .input-wrapper {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            #user-input {
+                border-radius: 15px;
+            }
+
+            #send-btn {
+                border-radius: 15px;
+                width: 100%;
+            }
+
+            .user, .assistant {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .user::before, .assistant::before {
+                display: none;
+            }
+
+            .sources {
+                margin: 20px 0;
+            }
+
+            .sources::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div class="header">
+            <h1>CIRD Manual Bot</h1>
+            <div class="subtitle">Your intelligent assistant for CIRD documentation</div>
+        </div>
+        
+        <div class="chat-content">
+            <div id="input-section">
+                <div class="input-wrapper">
+                    <input type="text" id="user-input" placeholder="Ask me anything about CIRD procedures..." onkeypress="handleKeyPress(event)">
+                    <button id="send-btn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+            
+            <div id="messages">
+                <div class="empty-state">Start a conversation by asking a question above</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isFirstMessage = true;
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Clear empty state on first message
+            if (isFirstMessage) {
+                document.getElementById('messages').innerHTML = '';
+                isFirstMessage = false;
+            }
+            
+            // Display user message
+            addMessage('You: ' + message, 'user');
+            input.value = '';
+            
+            // Show loading state
+            const loadingMsg = addMessage('Assistant is analyzing your question...', 'assistant loading');
+            
+            // Send to backend
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({query: message})
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove loading message
+                loadingMsg.remove();
+                
+                // Display assistant response with proper formatting
+                const formattedResponse = formatResponse(data.response);
+                addMessage('Assistant:\n' + formattedResponse, 'assistant');
+                
+                // Display sources if available
+                if (data.sources && data.sources.length > 0) {
+                    let sourcesText = 'Sources:\n';
+                    data.sources.forEach((source, index) => {
+                        sourcesText += `${index + 1}. ${source.title}`;
+                        if (source.page) {
+                            sourcesText += ` (Page ${source.page})`;
+                        }
+                        if (source.url) {
+                            sourcesText += ` - <a href="${source.url}" target="_blank">View on HMRC</a>`;
+                        }
+                        sourcesText += '\n';
+                    });
+                    addMessage(sourcesText, 'sources');
+                }
+            })
+            .catch(error => {
+                // Remove loading message
+                loadingMsg.remove();
+                console.error('Error:', error);
+                addMessage('Assistant:\nI apologize, but I encountered an error while processing your request. Please try again in a moment.', 'assistant');
+            });
+        }
+
+        function formatResponse(text) {
+            // Enhanced formatting with better HTML structure
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+                .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic text
+                .replace(/\n\s*[-•]\s*/g, '\n• ') // Bullet points
+                .replace(/\n\d+\.\s*/g, function(match) { return '\n' + match; }); // Numbered lists
+        }
+
+        function addMessage(text, className) {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + className;
+            messageDiv.innerHTML = text;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+            return messageDiv;
+        }
+    </script>
+</body>
+</html>
