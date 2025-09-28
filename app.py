@@ -5,6 +5,7 @@ from local_rag_chromadb2 import LocalRAGChatbot
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB limit
 
 # Initialize chatbot
 try:
