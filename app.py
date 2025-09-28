@@ -2,6 +2,7 @@
 import os
 from flask import Flask, render_template, request, jsonify
 from local_rag_chromadb2 import LocalRAGChatbot
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
