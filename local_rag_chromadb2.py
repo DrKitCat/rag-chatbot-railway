@@ -220,7 +220,7 @@ class LocalRAGChatbot:
         count = self.collection.count()
         logger.info(f"Total documents in local database: {count}")
     
-    def search_documents(self, query: str, top_k: int = 30) -> List[Dict]:
+    def search_documents(self, query: str, top_k: int = 5) -> List[Dict]:
         """Search for relevant documents in ChromaDB."""
         try:
             results = self.collection.query(
@@ -318,7 +318,7 @@ Please provide a comprehensive answer basaed on the document context above."""
         return "https://www.gov.uk/hmrc-internal-manuals/corporate-intangibles-research-and-development-manual"
     
     
-    def chat(self, query: str, top_k: int = 30) -> Dict:
+    def chat(self, query: str, top_k: int = 5) -> Dict:
         """Main chat method - performs RAG pipeline."""
         logger.info(f"Processing query: {query}")
         
