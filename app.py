@@ -76,6 +76,43 @@ def chat():
 def health():
     return jsonify({'status': 'healthy'})
 
+@app.route('/upload', methods=['POST'])
+def upload_pdfs():
+    if 'files[]' not in request.files:
+        return jsonify({'error': 'No files selected'}), 400
+    
+    files = request.files.getlist('files[]')
+    processed = 0
+    
+    for file in files:
+        if file.filename.endswith('.pdf'):
+            # Save temporarily and process
+            temp_path = f"/tmp/{file.filename}"
+            file.save(temp_path)
+            
+            if chatbot.process_pdf_file(temp_path):
+                processed += 1
+            
+            os.remove(temp_path)  # Clean up
+    
+    return jsonify({
+        'message': f'Processed {processed} documents',
+        'total_docs': chatbot.get_collection_info()
+    })
+
+@app.route('/upload')
+def upload_page():
+    return '''
+    <html><body>
+    <h2>Upload CIRD Manual PDFs</h2>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="files[]" multiple accept=".pdf">
+        <input type="submit" value="Upload PDFs">
+    </form>
+    </body></html>
+    '''
+
+
 if __name__ == '__main__':
     # Railway deployment configuration
     port = int(os.environ.get('PORT', 5000))
