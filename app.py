@@ -102,32 +102,32 @@ def upload_pdfs():
         'total_docs': chatbot.get_collection_info()
     })
 
-@app.route('/upload')
-def upload_page():
-    return '''
-    <html><body>
-    <h2>Upload CIRD Manual PDFs</h2>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="files[]" multiple accept=".pdf">
-        <input type="submit" value="Upload PDFs">
-    </form>
-    </body></html>
-    '''
+# @app.route('/upload')
+# def upload_page():
+#     return '''
+#     <html><body>
+#     <h2>Upload CIRD Manual PDFs</h2>
+#     <form action="/upload" method="post" enctype="multipart/form-data">
+#         <input type="file" name="files[]" multiple accept=".pdf">
+#         <input type="submit" value="Upload PDFs">
+#     </form>
+#     </body></html>
+#     '''
 
 
-@app.route('/collection-info')
-def collection_info():
-    if not chatbot:
-        return jsonify({'error': 'Chatbot not available'}), 500
+# @app.route('/collection-info')
+# def collection_info():
+#     if not chatbot:
+#         return jsonify({'error': 'Chatbot not available'}), 500
     
-    try:
-        count = chatbot.get_collection_info()
-        return jsonify({
-            'total_documents': count,
-            'status': 'Documents loaded and ready for queries'
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+#     try:
+#         count = chatbot.get_collection_info()
+#         return jsonify({
+#             'total_documents': count,
+#             'status': 'Documents loaded and ready for queries'
+#         })
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Railway deployment configuration
