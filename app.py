@@ -15,6 +15,17 @@ except Exception as e:
     print(f"Chatbot initialization failed: {e}")
     chatbot = None
 
+# Process PDFs on startup if collection is empty
+try:
+    if chatbot and chatbot.get_collection_info() == 0:
+        print("Collection is empty. Processing PDFs from repository...")
+        chatbot.process_pdf_folder("./pdfs")
+        print(f"Loaded {chatbot.get_collection_info()} documents")
+except Exception as e:
+    print(f"Error processing PDFs on startup: {e}")
+
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
