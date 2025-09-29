@@ -3,9 +3,17 @@ import os
 from flask import Flask, render_template, request, jsonify
 from local_rag_chromadb2 import LocalRAGChatbot
 from werkzeug.utils import secure_filename
+from collections import defaultdict
+
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB limit
+
+
+# Per-IP rate limiting
+ip_usage = defaultdict(int)
+
+
 
 # Initialize chatbot
 try:
@@ -30,29 +38,13 @@ except Exception as e:
 def index():
     return render_template('index.html')
 
-# @app.route('/chat', methods=['POST'])
-# def chat():
-#     if not chatbot:
-#         return jsonify({'error': 'Chatbot not available'}), 500
-        
-#     data = request.get_json()
-#     query = data.get('query', '')
-    
-#     if not query:
-#         return jsonify({'error': 'No query provided'}), 400
-    
-#     print(f"Received query: {query}")
-    
-#     try:
-#         result = chatbot.chat_with_routing(query)
-#         print(f"Sending response: {result}")
-#         return jsonify(result)
-#     except Exception as e:
-#         print(f"Error processing query: {e}")
-#         return jsonify({'error': str(e)}), 500
-
 @app.route('/chat', methods=['POST'])
 def chat():
+        # Rate limiting for chat endpoint only
+    client_ip = request.remote_addr
+    if ip_usage[client_ip] >= 3:  # 3 chat requests per IP
+        return jsonify({'error': 'Personal limit reached.'}), 429
+    ip_usage[client_ip] += 1
     print("=== CHAT ENDPOINT HIT ===")
     print(f"Request method: {request.method}")
     print(f"Content-Type: {request.content_type}")
@@ -113,17 +105,7 @@ def upload_pdfs():
         'total_docs': chatbot.get_collection_info()
     })
 
-# @app.route('/upload')
-# def upload_page():
-#     return '''
-#     <html><body>
-#     <h2>Upload CIRD Manual PDFs</h2>
-#     <form action="/upload" method="post" enctype="multipart/form-data">
-#         <input type="file" name="files[]" multiple accept=".pdf">
-#         <input type="submit" value="Upload PDFs">
-#     </form>
-#     </body></html>
-#     '''
+
 
 
 @app.route('/collection-info')
