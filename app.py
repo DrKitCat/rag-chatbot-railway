@@ -10,6 +10,18 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB limit
 
 
+
+# Per-IP rate limiting
+ip_usage = defaultdict(int)
+
+@app.before_request 
+def limit_per_ip():
+    client_ip = request.remote_addr
+    if ip_usage[client_ip] >= 3:  # 3 requests per IP
+        return jsonify({'error': 'Personal limit reached.'}), 429
+    ip_usage[client_ip] += 1
+
+
 # Per-IP rate limiting
 ip_usage = defaultdict(int)
 
