@@ -1,16 +1,3 @@
-# flask==2.3.3
-# sentence-transformers==2.7.0
-# chromadb==0.4.15
-# pypdf==3.15.2
-# python-dotenv==1.0.0
-# azure-ai-inference
-# azure-core
-# azure-identity
-# azure-ai-projects
-# gunicorn==21.2.0
-# cryptography<48.0.0
-
-
 streamlit==1.39.0
 langchain==0.2.16
 langchain-community==0.2.17
@@ -23,3 +10,4 @@ python-dotenv==1.0.1
 pydantic==2.9.2
 pydantic-settings==2.5.2
 cryptography<48.0.0
+gunicorn==23.0.0
