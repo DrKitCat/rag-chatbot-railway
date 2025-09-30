@@ -3,29 +3,34 @@ import os
 from flask import Flask, render_template, request, jsonify
 from local_rag_chromadb2 import LocalRAGChatbot
 from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta
 from collections import defaultdict
-
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB limit
 
+# Store IP addresses with timestamps for rate limiting
+ip_usage = defaultdict(list)
+RATE_LIMIT = 3  # requests
+RATE_WINDOW = 3600  # 1 hour in seconds
 
-
-# Per-IP rate limiting
-ip_usage = defaultdict(int)
-
-@app.before_request 
+@app.before_request
 def limit_per_ip():
     client_ip = request.remote_addr
-    if ip_usage[client_ip] >= 3:  # 3 requests per IP
-        return jsonify({'error': 'Personal limit reached.'}), 429
-    ip_usage[client_ip] += 1
-
-
-# Per-IP rate limiting
-ip_usage = defaultdict(int)
-
-
+    now = datetime.now()
+    
+    # Clean old requests outside the time window
+    ip_usage[client_ip] = [
+        timestamp for timestamp in ip_usage[client_ip]
+        if (now - timestamp).total_seconds() < RATE_WINDOW
+    ]
+    
+    # Check if limit exceeded
+    if len(ip_usage[client_ip]) >= RATE_LIMIT:
+        return jsonify({'error': 'Rate limit exceeded. Try again in an hour.'}), 429
+    
+    # Add current request
+    ip_usage[client_ip].append(now)
 
 # Initialize chatbot
 try:
@@ -44,19 +49,12 @@ try:
 except Exception as e:
     print(f"Error processing PDFs on startup: {e}")
 
-
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
-        # Rate limiting for chat endpoint only
-    client_ip = request.remote_addr
-    if ip_usage[client_ip] >= 3:  # 3 chat requests per IP
-        return jsonify({'error': 'Personal limit reached.'}), 429
-    ip_usage[client_ip] += 1
     print("=== CHAT ENDPOINT HIT ===")
     print(f"Request method: {request.method}")
     print(f"Content-Type: {request.content_type}")
@@ -87,8 +85,6 @@ def chat():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-
-
 @app.route('/health')
 def health():
     return jsonify({'status': 'healthy'})
@@ -116,9 +112,6 @@ def upload_pdfs():
         'message': f'Processed {processed} documents',
         'total_docs': chatbot.get_collection_info()
     })
-
-
-
 
 @app.route('/collection-info')
 def collection_info():
