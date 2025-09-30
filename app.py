@@ -17,7 +17,7 @@ ip_usage = defaultdict(int)
 @app.before_request 
 def limit_per_ip():
     client_ip = request.remote_addr
-    if ip_usage[client_ip] >= 10:  # 10 requests per IP
+    if ip_usage[client_ip] >= 100:  # 100 requests per IP
         return jsonify({'error': 'Personal limit reached.'}), 429
     ip_usage[client_ip] += 1
 
@@ -54,7 +54,7 @@ def index():
 def chat():
         # Rate limiting for chat endpoint only
     client_ip = request.remote_addr
-    if ip_usage[client_ip] >= 10:  # 10 chat requests per IP
+    if ip_usage[client_ip] >= 100:  # 100 chat requests per IP
         return jsonify({'error': 'Personal limit reached.'}), 429
     ip_usage[client_ip] += 1
     print("=== CHAT ENDPOINT HIT ===")
